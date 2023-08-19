@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -33,6 +34,28 @@ public class DishesJpaAdapter implements DishesRepository {
     public List<Optional<DishesDomain>> getAllDishes() {
         try {
             List<Dishes> dishes = dishesJpaRepository.findAll();
+            return dishes.stream()
+                    .map(dish -> Optional.of(mapper.map(dish, DishesDomain.class)))
+                    .toList();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Optional<DishesDomain> getDishById(UUID id) {
+        try {
+            Optional<Dishes> dish = dishesJpaRepository.findById(id);
+            return dish.map(dishes -> mapper.map(dishes, DishesDomain.class));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Optional<DishesDomain>> getDishesByName(String name) {
+        try {
+            List<Dishes> dishes = dishesJpaRepository.findDishesByNameIsContainingIgnoreCase(name);
             return dishes.stream()
                     .map(dish -> Optional.of(mapper.map(dish, DishesDomain.class)))
                     .toList();
